@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
-
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -11,50 +9,73 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Método para pegar as tarefas do Firebase
-  Stream<List<Map<String, dynamic>>> _getTasks() {
-    return _firestore.collection('tasks').snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) => doc.data()).toList();
-    });
+  // Método get 
+  Stream<QuerySnapshot> _getTasksStream() {
+    return _firestore.collection('tasks').orderBy('created_at', descending: true).snapshots();
+  }
+
+  // Método delete
+  Future<void> _deleteTask(String taskId) async {
+    try {
+      await _firestore.collection('tasks').doc(taskId).delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tarefa excluída com sucesso!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao excluir tarefa: $e')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Minhas Tarefas'),
+        title: const Text('Minhas Tarefas'),
         actions: [
           IconButton(
-            icon: Icon(Icons.add),
+            icon: const Icon(Icons.add),
             onPressed: () {
               Navigator.pushNamed(context, '/add-task');
             },
           ),
         ],
       ),
-      body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _getTasks(),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: _getTasksStream(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('Erro ao carregar tarefas.'));
+            return const Center(child: Text('Erro ao carregar tarefas.'));
           }
 
-          final tasks = snapshot.data;
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('Nenhuma tarefa encontrada.'));
+          }
+
+          final tasks = snapshot.data!.docs;
 
           return ListView.builder(
-            itemCount: tasks?.length ?? 0,
+            itemCount: tasks.length,
             itemBuilder: (context, index) {
-              final task = tasks![index];
+              final task = tasks[index];
+              final taskId = task.id; 
+              final title = task['title'] ?? 'Sem título';
+              final description = task['description'] ?? 'Sem descrição';
+
               return ListTile(
-                title: Text(task['title'] ?? 'Sem título'),
-                subtitle: Text(task['description'] ?? 'Sem descrição'),
-                trailing: Icon(Icons.check_circle_outline),
+                title: Text(title),
+                subtitle: Text(description),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _deleteTask(taskId),
+                ),
                 onTap: () {
-                  // Ação para visualizar os detalhes da tarefa
+                  // criar metodo para exibir detalhes da tarefa
                 },
               );
             },
