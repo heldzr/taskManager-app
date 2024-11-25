@@ -52,6 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
             content:
                 Text(_isLogin ? 'Login bem-sucedido!' : 'Cadastro realizado!')),
       );
+      Navigator.pushReplacementNamed(context, '/main');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro: ${e.toString()}')),
