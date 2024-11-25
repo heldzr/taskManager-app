@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -25,7 +27,6 @@ class _MainScreenState extends State<MainScreen> {
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () {
-              // Navegar para a tela de adicionar tarefa
               Navigator.pushNamed(context, '/add-task');
             },
           ),

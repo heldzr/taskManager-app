@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:task_manager_app/screens/login.dart';
 import 'screens/main_screen.dart';
+import 'screens/add_task_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +29,7 @@ class TaskManagerApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginScreen(),
         '/main': (context) => MainScreen(),
+        '/add-task': (context) => const AddTaskScreen(),
       },
       debugShowCheckedModeBanner: false,
     );
