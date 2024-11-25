@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'edit_task_screen.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -9,9 +10,12 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Método get 
+  // Método get
   Stream<QuerySnapshot> _getTasksStream() {
-    return _firestore.collection('tasks').orderBy('created_at', descending: true).snapshots();
+    return _firestore
+        .collection('tasks')
+        .orderBy('created_at', descending: true)
+        .snapshots();
   }
 
   // Método delete
@@ -63,7 +67,7 @@ class _MainScreenState extends State<MainScreen> {
             itemCount: tasks.length,
             itemBuilder: (context, index) {
               final task = tasks[index];
-              final taskId = task.id; 
+              final taskId = task.id;
               final title = task['title'] ?? 'Sem título';
               final description = task['description'] ?? 'Sem descrição';
 
@@ -75,7 +79,17 @@ class _MainScreenState extends State<MainScreen> {
                   onPressed: () => _deleteTask(taskId),
                 ),
                 onTap: () {
-                  // criar metodo para exibir detalhes da tarefa
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditTaskScreen(
+                        taskId: task.id,
+                        initialTitle: task['title'] ?? 'Sem título',
+                        initialDescription:
+                            task['description'] ?? 'Sem descrição',
+                      ),
+                    ),
+                  );
                 },
               );
             },
