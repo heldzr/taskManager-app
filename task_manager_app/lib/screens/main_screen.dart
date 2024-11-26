@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'details_screen.dart';
-import 'edit_task_screen.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -73,11 +72,26 @@ class _MainScreenState extends State<MainScreen> {
               final description = task['description'] ?? 'Sem descrição';
 
               return ListTile(
-                title: Text(title),
+                leading: Checkbox(
+                  value: task['status'] ?? false, // Mostra se está concluída
+                  onChanged: (bool? newValue) {
+                    _firestore.collection('tasks').doc(task.id).update({
+                      'status': newValue, // Atualiza o status no Firestore
+                    });
+                  },
+                ),
+                title: Text(
+                  title,
+                  style: TextStyle(
+                    decoration: (task['status'] ?? false)
+                        ? TextDecoration.lineThrough // Risca a tarefa concluída
+                        : TextDecoration.none,
+                  ),
+                ),
                 subtitle: Text(description),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => _deleteTask(taskId),
+                  onPressed: () => _deleteTask(task.id),
                 ),
                 onTap: () {
                   Navigator.push(

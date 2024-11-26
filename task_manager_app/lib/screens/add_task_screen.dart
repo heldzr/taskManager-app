@@ -33,6 +33,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       await _firestore.collection('tasks').add({
         'title': title,
         'description': description,
+        'status': false, 
         'created_at': Timestamp.now(),
       });
 
@@ -44,10 +45,6 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro ao salvar tarefa: $e')),
       );
-    } finally {
-      setState(() {
-        _isSaving = false;
-      });
     }
   }
 

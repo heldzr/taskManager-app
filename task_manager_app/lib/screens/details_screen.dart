@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'edit_task_screen.dart'; 
+import 'edit_task_screen.dart';
 
 class TaskDetailsScreen extends StatelessWidget {
   final String taskId;
@@ -23,8 +23,8 @@ class TaskDetailsScreen extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => EditTaskScreen(
                     taskId: taskId,
-                    initialTitle: '', 
-                    initialDescription: '', 
+                    initialTitle: '',
+                    initialDescription: '',
                   ),
                 ),
               );
@@ -39,7 +39,9 @@ class TaskDetailsScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (snapshot.hasError || !snapshot.hasData || !snapshot.data!.exists) {
+          if (snapshot.hasError ||
+              !snapshot.hasData ||
+              !snapshot.data!.exists) {
             return const Center(
               child: Text('Erro ao carregar os detalhes da tarefa.'),
             );
@@ -70,6 +72,19 @@ class TaskDetailsScreen extends StatelessWidget {
                     'Criada em: ${createdAt.day}/${createdAt.month}/${createdAt.year}',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: () async {
+                    final currentStatus = taskData['status'] ?? false;
+                    await firestore.collection('tasks').doc(taskId).update({
+                      'status': !currentStatus, // Inverte o status atual
+                    });
+                    Navigator.pop(context); // Volta para a tela principal
+                  },
+                  child: Text(taskData['status'] ?? false
+                      ? 'Marcar como Pendente'
+                      : 'Marcar como Concluída'),
+                ),
               ],
             ),
           );
