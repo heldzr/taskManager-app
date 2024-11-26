@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'details_screen.dart';
 import 'edit_task_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -82,12 +83,7 @@ class _MainScreenState extends State<MainScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => EditTaskScreen(
-                        taskId: task.id,
-                        initialTitle: task['title'] ?? 'Sem título',
-                        initialDescription:
-                            task['description'] ?? 'Sem descrição',
-                      ),
+                      builder: (context) => TaskDetailsScreen(taskId: task.id),
                     ),
                   );
                 },
