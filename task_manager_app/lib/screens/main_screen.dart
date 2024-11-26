@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'details_screen.dart';
+import 'profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -10,26 +11,12 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Método get
+  // Método para obter o stream das tarefas
   Stream<QuerySnapshot> _getTasksStream() {
     return _firestore
         .collection('tasks')
         .orderBy('created_at', descending: true)
         .snapshots();
-  }
-
-  // Método delete
-  Future<void> _deleteTask(String taskId) async {
-    try {
-      await _firestore.collection('tasks').doc(taskId).delete();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tarefa excluída com sucesso!')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao excluir tarefa: $e')),
-      );
-    }
   }
 
   @override
@@ -46,6 +33,71 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ],
       ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Text(
+                    'Bem-vindo!',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Selecione uma opção:',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('Perfil'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ProfileScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.list),
+              title: const Text('Minhas Tarefas'),
+              onTap: () {
+                Navigator.pop(context); // Fecha o Drawer e retorna à tela principal
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Configurações'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Logout'),
+              onTap: () {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/login',
+                  (route) => false,
+                );
+              },
+            ),
+          ],
+        ),
+      ),
       body: StreamBuilder<QuerySnapshot>(
         stream: _getTasksStream(),
         builder: (context, snapshot) {
@@ -53,11 +105,7 @@ class _MainScreenState extends State<MainScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (snapshot.hasError) {
-            return const Center(child: Text('Erro ao carregar tarefas.'));
-          }
-
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          if (snapshot.hasError || !snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(child: Text('Nenhuma tarefa encontrada.'));
           }
 
@@ -70,34 +118,35 @@ class _MainScreenState extends State<MainScreen> {
               final taskId = task.id;
               final title = task['title'] ?? 'Sem título';
               final description = task['description'] ?? 'Sem descrição';
+              final status = task['status'] ?? false;
 
               return ListTile(
                 leading: Checkbox(
-                  value: task['status'] ?? false, // Mostra se está concluída
+                  value: status,
                   onChanged: (bool? newValue) {
-                    _firestore.collection('tasks').doc(task.id).update({
-                      'status': newValue, // Atualiza o status no Firestore
+                    _firestore.collection('tasks').doc(taskId).update({
+                      'status': newValue,
                     });
                   },
                 ),
                 title: Text(
                   title,
                   style: TextStyle(
-                    decoration: (task['status'] ?? false)
-                        ? TextDecoration.lineThrough // Risca a tarefa concluída
-                        : TextDecoration.none,
+                    decoration: status ? TextDecoration.lineThrough : TextDecoration.none,
                   ),
                 ),
                 subtitle: Text(description),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => _deleteTask(task.id),
+                  onPressed: () {
+                    _firestore.collection('tasks').doc(taskId).delete();
+                  },
                 ),
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => TaskDetailsScreen(taskId: task.id),
+                      builder: (context) => TaskDetailsScreen(taskId: taskId),
                     ),
                   );
                 },
