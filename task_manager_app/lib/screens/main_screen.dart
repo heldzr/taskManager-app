@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'details_screen.dart';
 import 'profile_screen.dart';
+import 'settings_screen.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -77,12 +78,19 @@ class _MainScreenState extends State<MainScreen> {
               leading: const Icon(Icons.list),
               title: const Text('Minhas Tarefas'),
               onTap: () {
-                Navigator.pop(context); // Fecha o Drawer e retorna à tela principal
+                Navigator.pop(context);
               },
             ),
             ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('Configurações'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const SettingsScreen()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.logout),
@@ -105,7 +113,9 @@ class _MainScreenState extends State<MainScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (snapshot.hasError || !snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          if (snapshot.hasError ||
+              !snapshot.hasData ||
+              snapshot.data!.docs.isEmpty) {
             return const Center(child: Text('Nenhuma tarefa encontrada.'));
           }
 
@@ -132,7 +142,9 @@ class _MainScreenState extends State<MainScreen> {
                 title: Text(
                   title,
                   style: TextStyle(
-                    decoration: status ? TextDecoration.lineThrough : TextDecoration.none,
+                    decoration: status
+                        ? TextDecoration.lineThrough
+                        : TextDecoration.none,
                   ),
                 ),
                 subtitle: Text(description),
