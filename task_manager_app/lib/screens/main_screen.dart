@@ -24,15 +24,8 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true, // Centraliza o título
         title: const Text('Minhas Tarefas'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.pushNamed(context, '/add-task');
-            },
-          ),
-        ],
       ),
       drawer: Drawer(
         child: ListView(
@@ -40,7 +33,7 @@ class _MainScreenState extends State<MainScreen> {
           children: [
             DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: const Color(0xFFC4A7E7), 
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,6 +44,7 @@ class _MainScreenState extends State<MainScreen> {
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   SizedBox(height: 8),
@@ -65,8 +59,11 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('Perfil'),
+              leading: const Icon(Icons.person, color: Color(0xFFC4A7E7)),
+              title: const Text(
+                'Perfil',
+                style: TextStyle(color: Color(0xFF2D2D2D)),
+              ),
               onTap: () {
                 Navigator.push(
                   context,
@@ -75,15 +72,21 @@ class _MainScreenState extends State<MainScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.list),
-              title: const Text('Minhas Tarefas'),
+              leading: const Icon(Icons.list, color: Color(0xFFC4A7E7)),
+              title: const Text(
+                'Minhas Tarefas',
+                style: TextStyle(color: Color(0xFF2D2D2D)),
+              ),
               onTap: () {
                 Navigator.pop(context);
               },
             ),
             ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Configurações'),
+              leading: const Icon(Icons.settings, color: Color(0xFFC4A7E7)),
+              title: const Text(
+                'Configurações',
+                style: TextStyle(color: Color(0xFF2D2D2D)),
+              ),
               onTap: () {
                 Navigator.push(
                   context,
@@ -93,8 +96,11 @@ class _MainScreenState extends State<MainScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Logout'),
+              leading: const Icon(Icons.logout, color: Color(0xFFC4A7E7)),
+              title: const Text(
+                'Logout',
+                style: TextStyle(color: Color(0xFF2D2D2D)),
+              ),
               onTap: () {
                 Navigator.pushNamedAndRemoveUntil(
                   context,
@@ -122,6 +128,7 @@ class _MainScreenState extends State<MainScreen> {
           final tasks = snapshot.data!.docs;
 
           return ListView.builder(
+            padding: const EdgeInsets.all(16.0),
             itemCount: tasks.length,
             itemBuilder: (context, index) {
               final task = tasks[index];
@@ -130,42 +137,53 @@ class _MainScreenState extends State<MainScreen> {
               final description = task['description'] ?? 'Sem descrição';
               final status = task['status'] ?? false;
 
-              return ListTile(
-                leading: Checkbox(
-                  value: status,
-                  onChanged: (bool? newValue) {
-                    _firestore.collection('tasks').doc(taskId).update({
-                      'status': newValue,
-                    });
-                  },
-                ),
-                title: Text(
-                  title,
-                  style: TextStyle(
-                    decoration: status
-                        ? TextDecoration.lineThrough
-                        : TextDecoration.none,
+              return Card(
+                elevation: 4,
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                child: ListTile(
+                  leading: Checkbox(
+                    value: status,
+                    onChanged: (bool? newValue) {
+                      _firestore.collection('tasks').doc(taskId).update({
+                        'status': newValue,
+                      });
+                    },
                   ),
-                ),
-                subtitle: Text(description),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () {
-                    _firestore.collection('tasks').doc(taskId).delete();
+                  title: Text(
+                    title,
+                    style: TextStyle(
+                      decoration: status
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
+                    ),
+                  ),
+                  subtitle: Text(description),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      _firestore.collection('tasks').doc(taskId).delete();
+                    },
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TaskDetailsScreen(taskId: taskId),
+                      ),
+                    );
                   },
                 ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TaskDetailsScreen(taskId: taskId),
-                    ),
-                  );
-                },
               );
             },
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/add-task');
+        },
+        backgroundColor: const Color(0xFFC4A7E7),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
