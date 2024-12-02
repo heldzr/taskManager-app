@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AddTaskScreen extends StatefulWidget {
   const AddTaskScreen({super.key});
@@ -33,7 +34,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       await _firestore.collection('tasks').add({
         'title': title,
         'description': description,
-        'status': false, 
+        'status': false,
         'created_at': Timestamp.now(),
       });
 
@@ -45,6 +46,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro ao salvar tarefa: $e')),
       );
+    } finally {
+      setState(() {
+        _isSaving = false;
+      });
     }
   }
 
@@ -53,28 +58,66 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Adicionar Tarefa'),
+        centerTitle: true, // Centraliza o título
+        backgroundColor: const Color(0xFFC4A7E7), // Cor da AppBar
       ),
+      backgroundColor: const Color(0xFFF8F9FA), // Fundo claro
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Título'),
+              decoration: InputDecoration(
+                labelText: 'Título',
+                labelStyle: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF6C757D),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _descriptionController,
-              decoration: const InputDecoration(labelText: 'Descrição'),
+              decoration: InputDecoration(
+                labelText: 'Descrição',
+                labelStyle: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF6C757D),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               maxLines: 4,
             ),
             const SizedBox(height: 32),
             if (_isSaving)
-              const CircularProgressIndicator()
+              const Center(child: CircularProgressIndicator())
             else
               ElevatedButton(
                 onPressed: _saveTask,
-                child: const Text('Salvar Tarefa'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.all(16),
+                  backgroundColor: const Color(0xFFC4A7E7),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Text(
+                  'Salvar Tarefa',
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
               ),
           ],
         ),
