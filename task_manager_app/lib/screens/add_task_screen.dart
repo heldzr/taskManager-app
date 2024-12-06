@@ -76,6 +76,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   fontWeight: FontWeight.w500,
                   color: const Color(0xFF6C757D),
                 ),
+                prefixIcon: const Icon(Icons.title, color: Color(0xFFC4A7E7)),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -91,6 +92,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   fontWeight: FontWeight.w500,
                   color: const Color(0xFF6C757D),
                 ),
+                prefixIcon: const Icon(Icons.description, color: Color(0xFFC4A7E7)),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
