@@ -2,12 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  _SettingsScreenState createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  bool _isProcessing = false;
 
   Future<void> _resetPassword(BuildContext context) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null && user.email != null) {
+      setState(() {
+        _isProcessing = true;
+      });
+
       try {
         await FirebaseAuth.instance.sendPasswordResetEmail(email: user.email!);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -17,6 +28,10 @@ class SettingsScreen extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erro ao enviar e-mail: $e')),
         );
+      } finally {
+        setState(() {
+          _isProcessing = false;
+        });
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -28,6 +43,10 @@ class SettingsScreen extends StatelessWidget {
   Future<void> _deleteAccount(BuildContext context) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
+      setState(() {
+        _isProcessing = true;
+      });
+
       try {
         await user.delete();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -38,6 +57,10 @@ class SettingsScreen extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erro ao excluir conta: $e')),
         );
+      } finally {
+        setState(() {
+          _isProcessing = false;
+        });
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -69,28 +92,29 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => _resetPassword(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFC4A7E7),
-                padding: const EdgeInsets.all(16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text(
-                'Redefinir Senha',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
+            _isProcessing
+                ? const Center(child: CircularProgressIndicator())
+                : ElevatedButton(
+                    onPressed: () => _resetPassword(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFC4A7E7),
+                      padding: const EdgeInsets.all(16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      'Redefinir Senha',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                // Exibe o pop-up de confirmação
                 showDialog(
                   context: context,
                   builder: (ctx) => AlertDialog(
@@ -109,7 +133,7 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     actions: [
                       TextButton(
-                        onPressed: () => Navigator.pop(ctx), // Fecha o pop-up
+                        onPressed: () => Navigator.pop(ctx),
                         child: Text(
                           'Cancelar',
                           style: GoogleFonts.poppins(
@@ -120,8 +144,8 @@ class SettingsScreen extends StatelessWidget {
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.pop(ctx); // Fecha o pop-up
-                          _deleteAccount(context); // Exclui a conta
+                          Navigator.pop(ctx);
+                          _deleteAccount(context);
                         },
                         child: Text(
                           'Excluir',
@@ -136,7 +160,7 @@ class SettingsScreen extends StatelessWidget {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFDC3545), // Vermelho
+                backgroundColor: const Color(0xFFDC3545),
                 padding: const EdgeInsets.all(16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),

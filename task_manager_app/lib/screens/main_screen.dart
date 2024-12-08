@@ -12,7 +12,6 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Método para obter o stream das tarefas
   Stream<QuerySnapshot> _getTasksStream() {
     return _firestore
         .collection('tasks')
@@ -20,11 +19,41 @@ class _MainScreenState extends State<MainScreen> {
         .snapshots();
   }
 
+  void _showDeleteConfirmationDialog(String taskId, String taskTitle) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Excluir Tarefa'),
+          content: Text('Tem certeza de que deseja excluir a tarefa "$taskTitle"?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _firestore.collection('tasks').doc(taskId).delete();
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Tarefa excluída com sucesso!')),
+                );
+              },
+              child: const Text('Excluir'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true, // Centraliza o título
+        centerTitle: true,
         title: const Text('Minhas Tarefas'),
       ),
       drawer: Drawer(
@@ -32,8 +61,8 @@ class _MainScreenState extends State<MainScreen> {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: BoxDecoration(
-                color: const Color(0xFFC4A7E7), 
+              decoration: const BoxDecoration(
+                color: Color(0xFFC4A7E7),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,7 +190,7 @@ class _MainScreenState extends State<MainScreen> {
                   trailing: IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
                     onPressed: () {
-                      _firestore.collection('tasks').doc(taskId).delete();
+                      _showDeleteConfirmationDialog(taskId, title);
                     },
                   ),
                   onTap: () {
